@@ -1,0 +1,27 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/.pytest_cache/
+
+# Angular / Node
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+
+# Environment
+.env
+*.env
+
+# Certificates / private keys
+certs/
+*.key
+*.crt
+*.pem
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

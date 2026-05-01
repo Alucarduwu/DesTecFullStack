@@ -1,0 +1,1051 @@
+<main class="app-canvas" [class.dark-mode]="isDarkMode">
+  <div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="fixed left-0 top-0 z-20 hidden h-screen w-72 flex-col border-r border-pink-200 bg-white/80 p-5 shadow-2xl shadow-pink-100/70 backdrop-blur-xl lg:flex">
+      <div class="brand-panel">
+        <p class="text-xs font-black uppercase tracking-[0.22em] text-pink-100">
+          Reto Técnico
+        </p>
+
+        <h1 class="mt-3 text-2xl font-black leading-tight">
+          FullStack Dashboard
+        </h1>
+
+        <p class="mt-3 text-sm leading-6 text-pink-50">
+          Casa Mecate · Angular · FastAPI · SQLite · Docker
+        </p>
+      </div>
+
+      <nav class="mt-7 space-y-3">
+        <button
+          class="sidebar-item"
+          [class.sidebar-item--active]="activeSection === 'home'"
+          (click)="setSection('home')"
+        >
+          <span class="sidebar-icon">⌂</span>
+          <span>
+            <strong>Inicio</strong>
+            <small>Presentación del proyecto</small>
+          </span>
+        </button>
+
+        <button
+          class="sidebar-item"
+          [class.sidebar-item--active]="activeSection === 'stackoverflow'"
+          (click)="setSection('stackoverflow')"
+        >
+          <span class="sidebar-icon">API</span>
+          <span>
+            <strong>StackOverflow</strong>
+            <small>5 preguntas del reto</small>
+          </span>
+        </button>
+
+        <button
+          class="sidebar-item"
+          [class.sidebar-item--active]="activeSection === 'flights'"
+          (click)="setSection('flights')"
+        >
+          <span class="sidebar-icon sidebar-icon--purple">SQL</span>
+          <span>
+            <strong>Vuelos México</strong>
+            <small>4 consultas SQL</small>
+          </span>
+        </button>
+      </nav>
+
+      <button class="theme-toggle" (click)="toggleTheme()">
+        <span class="theme-toggle__icon">
+          {{ isDarkMode ? '☀' : '☾' }}
+        </span>
+
+        <span>
+          <strong>{{ isDarkMode ? 'Modo claro' : 'Modo oscuro' }}</strong>
+          <small>{{ isDarkMode ? 'Volver a rosita' : 'Activar dark cute' }}</small>
+        </span>
+      </button>
+
+      <div class="mt-auto rounded-[1.5rem] border border-pink-100 bg-pink-50 p-4">
+        <p class="text-xs font-black uppercase tracking-[0.18em] text-pink-500">
+          Backend activo
+        </p>
+
+        <p class="mt-2 text-sm font-bold text-slate-700">
+          FastAPI corriendo en Docker
+        </p>
+
+        <a
+          href="http://localhost:8000/docs"
+          target="_blank"
+          class="mt-3 inline-flex text-sm font-black text-pink-600"
+        >
+          Abrir Swagger →
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <section class="w-full lg:pl-72">
+      <div class="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+
+        <!-- MOBILE HEADER -->
+        <section class="mb-6 rounded-[2rem] border border-pink-200 bg-white/85 p-5 shadow-xl shadow-pink-100/50 lg:hidden">
+          <p class="text-xs font-black uppercase tracking-[0.2em] text-pink-500">
+            FullStack Test
+          </p>
+
+          <h1 class="mt-2 text-3xl font-black tracking-[-0.06em]">
+            Casa Mecate Dashboard
+          </h1>
+
+          <div class="mt-5 grid grid-cols-3 gap-2">
+            <button
+              class="mobile-tab"
+              [class.mobile-tab--active]="activeSection === 'home'"
+              (click)="setSection('home')"
+            >
+              Inicio
+            </button>
+
+            <button
+              class="mobile-tab"
+              [class.mobile-tab--active]="activeSection === 'stackoverflow'"
+              (click)="setSection('stackoverflow')"
+            >
+              API
+            </button>
+
+            <button
+              class="mobile-tab"
+              [class.mobile-tab--active]="activeSection === 'flights'"
+              (click)="setSection('flights')"
+            >
+              SQL
+            </button>
+          </div>
+
+          <button class="theme-toggle theme-toggle--mobile" (click)="toggleTheme()">
+            <span class="theme-toggle__icon">
+              {{ isDarkMode ? '☀' : '☾' }}
+            </span>
+
+            <span>
+              <strong>{{ isDarkMode ? 'Modo claro' : 'Modo oscuro' }}</strong>
+              <small>{{ isDarkMode ? 'Volver a rosita' : 'Activar dark cute' }}</small>
+            </span>
+          </button>
+        </section>
+
+        <!-- LOADING -->
+        <section
+          *ngIf="loading"
+          class="rounded-[2rem] border border-pink-200 bg-white p-10 text-center shadow-xl shadow-pink-100"
+        >
+          <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-pink-100 border-t-pink-500"></div>
+          <h2 class="mt-5 text-2xl font-black">Cargando dashboard...</h2>
+          <p class="mt-2 text-slate-500">Consultando servicios REST del backend.</p>
+        </section>
+
+        <!-- ERROR -->
+        <section
+          *ngIf="!loading && errorMessage"
+          class="rounded-[2rem] border border-red-200 bg-red-50 p-10 text-center shadow-xl shadow-red-100"
+        >
+          <h2 class="text-2xl font-black text-red-600">No se pudo cargar el dashboard</h2>
+          <p class="mt-3 text-red-500">{{ errorMessage }}</p>
+
+          <button
+            class="mt-6 rounded-full bg-red-500 px-6 py-3 text-sm font-black text-white"
+            (click)="loadDashboard()"
+          >
+            Reintentar
+          </button>
+        </section>
+
+        <ng-container *ngIf="!loading && !errorMessage && data">
+
+          <!-- HOME -->
+          <section *ngIf="activeSection === 'home'" class="space-y-8">
+            <header class="hero-card">
+              <div class="relative z-10">
+                <span class="pill-label">Presentación del proyecto</span>
+
+                <h2 class="mt-7 text-5xl font-black leading-[0.9] tracking-[-0.08em] text-slate-950 md:text-7xl">
+                  Hola, Casa Mecate
+                  <span class="title-ink">
+                    este es mi reto FullStack
+                  </span>
+                </h2>
+
+                <p class="mt-6 max-w-4xl text-base leading-8 text-slate-600 md:text-lg">
+                  Desarrollé una aplicación FullStack que integra un backend en Python con FastAPI,
+                  una base de datos SQL con SQLite, consumo de una API externa de StackOverflow,
+                  dockerización del backend y una interfaz en Angular para visualizar los resultados
+                  de forma clara, ordenada e intuitiva.
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                  <button class="primary-button" (click)="loadDashboard()">
+                    Actualizar datos
+                  </button>
+
+                  <a
+                    class="secondary-button"
+                    href="http://localhost:8000/docs"
+                    target="_blank"
+                  >
+                    Ver documentación Swagger
+                  </a>
+                </div>
+              </div>
+            </header>
+
+            <section class="grid gap-5 lg:grid-cols-3">
+              <article class="info-card">
+                <p class="section-label">Backend</p>
+                <h3>FastAPI como intermediario</h3>
+                <p>
+                  El backend recibe información desde dos orígenes: una API externa en formato JSON
+                  y una base de datos SQL local. Después procesa los datos, calcula resultados y expone
+                  endpoints REST para que Angular pueda consumirlos.
+                </p>
+              </article>
+
+              <article class="info-card">
+                <p class="section-label">Frontend</p>
+                <h3>Angular como vista principal</h3>
+                <p>
+                  El frontend fue construido en Angular para presentar la información del reto mediante
+                  secciones, cards, tablas y bloques explicativos. La interfaz está pensada para que el flujo
+                  sea entendible tanto para revisión técnica como para revisión general.
+                </p>
+              </article>
+
+              <article class="info-card">
+                <p class="section-label">Docker</p>
+                <h3>Backend dockerizado</h3>
+                <p>
+                  El backend se ejecuta mediante Docker usando Dockerfile y docker-compose. Esto permite
+                  levantar la API de forma consistente, aislada y fácil de revisar desde cualquier entorno compatible.
+                </p>
+              </article>
+            </section>
+
+            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <article class="stat-card">
+                <p>Servicios principales</p>
+                <strong>9</strong>
+                <span>5 StackOverflow + 4 SQL</span>
+              </article>
+
+              <article class="stat-card">
+                <p>StackOverflow</p>
+                <strong>{{ data.answeredSummary?.total || 0 }}</strong>
+                <span>Elementos recibidos desde API externa</span>
+              </article>
+
+              <article class="stat-card">
+                <p>Vuelos registrados</p>
+                <strong>{{ data.flightsSummary?.total_vuelos || 0 }}</strong>
+                <span>Registros cargados en SQLite</span>
+              </article>
+
+              <article class="stat-card stat-card--purple">
+                <p>Documentación</p>
+                <strong>OAS</strong>
+                <span>Swagger / OpenAPI generado por FastAPI</span>
+              </article>
+            </section>
+
+            <section class="table-card">
+              <div class="table-header">
+                <div>
+                  <p class="section-label">Arquitectura general</p>
+                  <h3>Flujo de la aplicación</h3>
+                  <p class="mt-3 max-w-4xl text-sm leading-7 text-slate-500">
+                    La solución sigue el flujo solicitado en el reto: los datos SQL y JSON son procesados
+                    por el backend, y posteriormente el frontend consume los servicios REST para mostrar
+                    la información en pantalla.
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid gap-4 md:grid-cols-3">
+                <article class="schema-card">
+                  <span>Paso 1</span>
+                  <strong>SQL / JSON</strong>
+                  <p>
+                    SQLite almacena los datos de vuelos y StackExchange API entrega información externa
+                    en formato JSON.
+                  </p>
+                </article>
+
+                <article class="schema-card schema-card--purple">
+                  <span>Paso 2</span>
+                  <strong>Backend</strong>
+                  <p>
+                    FastAPI consulta, procesa, calcula y expone la información mediante endpoints REST.
+                  </p>
+                </article>
+
+                <article class="schema-card">
+                  <span>Paso 3</span>
+                  <strong>Vista Angular</strong>
+                  <p>
+                    Angular consume los endpoints del backend y presenta los resultados de manera visual.
+                  </p>
+                </article>
+              </div>
+            </section>
+
+            <section class="table-card">
+              <div class="table-header">
+                <div>
+                  <p class="section-label">Resumen de módulos</p>
+                  <h3>Módulos desarrollados</h3>
+                  <p class="mt-3 max-w-4xl text-sm leading-7 text-slate-500">
+                    La aplicación se divide en dos módulos principales. Cada módulo tiene su propia sección
+                    en el sidebar para revisar resultados, endpoints, respuestas e interpretación.
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <article class="module-accordion">
+                  <button class="module-accordion__button" (click)="setSection('stackoverflow')">
+                    <div class="module-accordion__main">
+                      <div class="module-accordion__icon">API</div>
+
+                      <div>
+                        <h4>StackOverflow API</h4>
+                        <p>Consumo de API externa, análisis de preguntas, reputación, vistas y fechas.</p>
+                      </div>
+                    </div>
+
+                    <div class="module-accordion__result">
+                      <span>{{ data.answeredSummary?.total || 0 }} elementos</span>
+                      <strong>Ver sección →</strong>
+                    </div>
+                  </button>
+                </article>
+
+                <article class="module-accordion">
+                  <button class="module-accordion__button" (click)="setSection('flights')">
+                    <div class="module-accordion__main">
+                      <div class="module-accordion__icon module-accordion__icon--purple">SQL</div>
+
+                      <div>
+                        <h4>Vuelos México</h4>
+                        <p>Consultas SQL sobre aerolíneas, aeropuertos, movimientos y vuelos.</p>
+                      </div>
+                    </div>
+
+                    <div class="module-accordion__result">
+                      <span>{{ data.flightsSummary?.total_vuelos || 0 }} vuelos</span>
+                      <strong>Ver sección →</strong>
+                    </div>
+                  </button>
+                </article>
+              </div>
+            </section>
+
+            <section class="table-card">
+              <div class="table-header">
+                <div>
+                  <p class="section-label">Stack técnico</p>
+                  <h3>Herramientas utilizadas</h3>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto rounded-3xl border border-pink-100">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Capa</th>
+                      <th>Herramienta</th>
+                      <th>Uso dentro del proyecto</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td>Frontend</td>
+                      <td>Angular</td>
+                      <td>
+                        Construcción de la interfaz, navegación por secciones, consumo del backend
+                        y visualización de resultados.
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>Backend</td>
+                      <td>Python + FastAPI</td>
+                      <td>
+                        API REST, documentación Swagger automática, consumo de StackExchange API
+                        y exposición de endpoints.
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>Base de datos</td>
+                      <td>SQLite</td>
+                      <td>
+                        Base SQL ligera para almacenar aerolíneas, aeropuertos, movimientos y vuelos.
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>Docker</td>
+                      <td>Dockerfile + docker-compose</td>
+                      <td>
+                        Dockerización del backend para facilitar ejecución y revisión del reto.
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>Documentación</td>
+                      <td>Swagger / OpenAPI</td>
+                      <td>
+                        Documentación automática de los servicios disponibles en el backend.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- STACKOVERFLOW -->
+          <section *ngIf="activeSection === 'stackoverflow'" class="space-y-8">
+            <header class="page-header">
+              <p class="section-label">Sección 1 · API externa</p>
+
+              <h2>StackOverflow API</h2>
+
+              <p>
+                Aquí se muestran las 5 preguntas solicitadas para la API externa. Cada bloque indica qué pregunta responde,
+                qué endpoint del backend se creó y cuál fue la respuesta obtenida.
+              </p>
+            </header>
+
+            <section class="explanation-card">
+              <h3>API consumida</h3>
+
+              <p>
+                El backend consume la API pública de StackExchange para obtener preguntas de StackOverflow relacionadas
+                con el término <strong>perl</strong>. Luego procesa el JSON y expone resultados limpios para Angular.
+              </p>
+
+              <div class="code-pill">
+                https://api.stackexchange.com/2.2/search?order=desc&sort=activity&intitle=perl&site=stackoverflow
+              </div>
+            </section>
+
+            <section class="grid gap-4 md:grid-cols-3">
+              <article class="stat-card">
+                <p>Contestadas</p>
+                <strong>{{ data.answeredSummary?.answered || 0 }}</strong>
+                <span>Preguntas con respuesta</span>
+              </article>
+
+              <article class="stat-card">
+                <p>No contestadas</p>
+                <strong>{{ data.answeredSummary?.unanswered || 0 }}</strong>
+                <span>Preguntas pendientes</span>
+              </article>
+
+              <article class="stat-card stat-card--purple">
+                <p>Total analizado</p>
+                <strong>{{ data.answeredSummary?.total || 0 }}</strong>
+                <span>Elementos desde API</span>
+              </article>
+            </section>
+
+            <!-- QUESTION 1 -->
+            <article class="question-card">
+              <button class="question-card__header" (click)="toggleQuestion('stack-1')">
+                <div>
+                  <span>Pregunta 1</span>
+                  <h3>¿Cuántas preguntas están contestadas y cuántas no?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'stack-1'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'stack-1'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/stackoverflow/answered-summary</strong>
+                  </div>
+
+                  <div class="answer-box">
+                    <p>Respuesta</p>
+                    <strong>
+                      {{ data.answeredSummary?.answered || 0 }} contestadas /
+                      {{ data.answeredSummary?.unanswered || 0 }} no contestadas
+                    </strong>
+                  </div>
+
+                  <div class="answer-box">
+                    <p>Interpretación</p>
+                    <strong>
+                      Este resultado permite conocer rápidamente cuántas preguntas ya tienen respuesta y cuántas siguen pendientes.
+                    </strong>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- QUESTION 2 -->
+            <article class="question-card">
+              <button class="question-card__header" (click)="toggleQuestion('stack-2')">
+                <div>
+                  <span>Pregunta 2</span>
+                  <h3>¿Cuál es la pregunta asociada al usuario con mayor reputación?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'stack-2'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'stack-2'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/stackoverflow/highest-reputation</strong>
+                  </div>
+
+                  <div class="answer-box">
+                    <p>Respuesta</p>
+                    <strong>
+                      {{ data.highestReputation?.owner?.display_name }} ·
+                      {{ data.highestReputation?.owner?.reputation || 0 }} reputación
+                    </strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Pregunta encontrada</p>
+                    <strong>{{ data.highestReputation?.title }}</strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: se identifica el resultado cuyo autor tiene la mayor reputación dentro de los datos recibidos.
+                    </p>
+
+                    <button class="text-link" (click)="openLink(data.highestReputation?.link)">
+                      Abrir pregunta →
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- QUESTION 3 -->
+            <article class="question-card">
+              <button class="question-card__header" (click)="toggleQuestion('stack-3')">
+                <div>
+                  <span>Pregunta 3</span>
+                  <h3>¿Cuál es la pregunta con menor número de vistas?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'stack-3'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'stack-3'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/stackoverflow/lowest-views</strong>
+                  </div>
+
+                  <div class="answer-box">
+                    <p>Respuesta</p>
+                    <strong>{{ data.lowestViews?.view_count || 0 }} vistas</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Pregunta encontrada</p>
+                    <strong>{{ data.lowestViews?.title }}</strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: esta pregunta es la que tuvo menor visibilidad dentro de los resultados analizados.
+                    </p>
+
+                    <button class="text-link" (click)="openLink(data.lowestViews?.link)">
+                      Abrir pregunta →
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- QUESTION 4 -->
+           <!-- QUESTION 4 -->
+<article class="question-card">
+  <button class="question-card__header" (click)="toggleQuestion('stack-4')">
+    <div>
+      <span>Pregunta 4</span>
+      <h3>¿Cuál es la pregunta más vieja y cuál es la más actual?</h3>
+    </div>
+
+    <strong [class.rotate-180]="expandedQuestion === 'stack-4'">↓</strong>
+  </button>
+
+  <section *ngIf="expandedQuestion === 'stack-4'" class="question-card__body">
+
+    <!-- Endpoint principal -->
+    <div class="answer-grid">
+      <div class="answer-box answer-box--wide">
+        <p>Endpoint que responde esta pregunta</p>
+        <strong>/api/stackoverflow/oldest-newest</strong>
+
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Este endpoint responde las dos partes de la pregunta. Devuelve un objeto con
+          <strong>oldest</strong> para la pregunta más vieja y <strong>newest</strong>
+          para la pregunta más actual.
+        </p>
+      </div>
+
+      <div class="answer-box">
+        <p>Respuesta interna 1</p>
+        <strong>oldest</strong>
+
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Contiene la pregunta más antigua encontrada en los resultados de StackOverflow.
+        </p>
+      </div>
+
+      <div class="answer-box">
+        <p>Respuesta interna 2</p>
+        <strong>newest</strong>
+
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Contiene la pregunta más reciente encontrada en los resultados de StackOverflow.
+        </p>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="answer-grid mt-5">
+      <div class="answer-box answer-box--wide">
+        <p>Pregunta más vieja</p>
+        <strong>{{ data.oldestNewest?.oldest?.title }}</strong>
+
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Fecha de creación:
+          <strong>{{ data.oldestNewest?.oldest?.creation_date }}</strong>
+        </p>
+
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          Link:
+          <strong>{{ data.oldestNewest?.oldest?.link }}</strong>
+        </p>
+
+        <button class="text-link" (click)="openLink(data.oldestNewest?.oldest?.link)">
+          Abrir pregunta más vieja →
+        </button>
+      </div>
+
+      <div class="answer-box answer-box--wide">
+        <p>Pregunta más actual</p>
+        <strong>{{ data.oldestNewest?.newest?.title }}</strong>
+
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Fecha de creación:
+          <strong>{{ data.oldestNewest?.newest?.creation_date }}</strong>
+        </p>
+
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          Link:
+          <strong>{{ data.oldestNewest?.newest?.link }}</strong>
+        </p>
+
+        <button class="text-link" (click)="openLink(data.oldestNewest?.newest?.link)">
+          Abrir pregunta más actual →
+        </button>
+      </div>
+
+      <div class="answer-box answer-box--wide">
+        <p>Interpretación</p>
+        <strong>
+          El backend compara las fechas de creación recibidas desde StackOverflow.
+          Con esa comparación identifica cuál pregunta fue publicada primero y cuál
+          es la más reciente dentro del conjunto analizado.
+        </strong>
+      </div>
+    </div>
+  </section>
+</article>
+
+            <!-- QUESTION 5 -->
+            <article class="question-card">
+              <button class="question-card__header" (click)="toggleQuestion('stack-5')">
+                <div>
+                  <span>Pregunta 5</span>
+                  <h3>¿Se imprimieron en consola los resultados del punto 2 al 5?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'stack-5'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'stack-5'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/stackoverflow/console-report</strong>
+                  </div>
+
+                  <div class="answer-box">
+                    <p>Respuesta del backend</p>
+                    <strong>{{ data.consoleReport?.message }}</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>¿Qué imprime en consola?</p>
+                    <strong>
+                      El backend imprime el reporte con la pregunta de mayor reputación, la pregunta con menor número
+                      de vistas, la pregunta más vieja y la pregunta más actual.
+                    </strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Verificación</p>
+                    <strong>
+                      Para verificarlo, abre la terminal o Docker Desktop donde está corriendo el backend.
+                      Cuando Angular consume este endpoint, deben aparecer los resultados impresos en los logs del backend.
+                    </strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      En Docker Desktop se revisa en: Containers → backend → Logs.
+                    </p>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Interpretación</p>
+                    <strong>
+                      Esta parte cumple el punto del reto donde se solicita imprimir en consola los resultados
+                      de los puntos 2 al 5. El frontend solo muestra la confirmación; la impresión real ocurre
+                      en el backend.
+                    </strong>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <section class="table-card">
+              <div class="table-header">
+                <div>
+                  <p class="section-label">Tabla general</p>
+                  <h3>Resumen de respuestas StackOverflow</h3>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto rounded-3xl border border-pink-100">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Pregunta</th>
+                      <th>Endpoint</th>
+                      <th>Respuesta corta</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td>Contestadas / no contestadas</td>
+                      <td>/answered-summary</td>
+                      <td>{{ data.answeredSummary?.answered }} / {{ data.answeredSummary?.unanswered }}</td>
+                    </tr>
+
+                    <tr>
+                      <td>Mayor reputación</td>
+                      <td>/highest-reputation</td>
+                      <td>{{ data.highestReputation?.owner?.display_name }} · {{ data.highestReputation?.owner?.reputation }}</td>
+                    </tr>
+
+                    <tr>
+                      <td>Menor vistas</td>
+                      <td>/lowest-views</td>
+                      <td>{{ data.lowestViews?.view_count }} vistas</td>
+                    </tr>
+
+                    <tr>
+  <td>Más vieja / más actual</td>
+  <td>/oldest-newest</td>
+  <td>
+    Vieja: {{ data.oldestNewest?.oldest?.title }}
+    <br />
+    Fecha: {{ data.oldestNewest?.oldest?.creation_date }}
+    <br /><br />
+    Actual: {{ data.oldestNewest?.newest?.title }}
+    <br />
+    Fecha: {{ data.oldestNewest?.newest?.creation_date }}
+  </td>
+</tr>
+
+                    <tr>
+                      <td>Reporte en consola</td>
+                      <td>/console-report</td>
+                      <td>{{ data.consoleReport?.message }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- FLIGHTS -->
+          <section *ngIf="activeSection === 'flights'" class="space-y-8">
+            <header class="page-header page-header--purple">
+              <p class="section-label">Sección 2 · Base de datos SQL</p>
+
+              <h2>Vuelos México SQL</h2>
+
+              <p>
+                Aquí se muestran las 4 preguntas SQL solicitadas en el reto. Cada bloque explica la consulta,
+                el endpoint backend y la respuesta obtenida desde SQLite.
+              </p>
+            </header>
+
+            <section class="explanation-card">
+              <h3>Tablas usadas en SQLite</h3>
+
+              <p>
+                El backend crea una base relacional con cuatro tablas principales. La tabla vuelos relaciona aerolíneas,
+                aeropuertos, movimientos y día para poder responder las consultas solicitadas.
+              </p>
+
+              <div class="mt-6 grid gap-4 md:grid-cols-4">
+                <div class="schema-card">
+                  <span>Tabla</span>
+                  <strong>aerolineas</strong>
+                  <p>id_aerolinea, nombre_aerolinea</p>
+                </div>
+
+                <div class="schema-card">
+                  <span>Tabla</span>
+                  <strong>aeropuertos</strong>
+                  <p>id_aeropuerto, nombre_aeropuerto</p>
+                </div>
+
+                <div class="schema-card">
+                  <span>Tabla</span>
+                  <strong>movimientos</strong>
+                  <p>id_movimiento, descripcion</p>
+                </div>
+
+                <div class="schema-card schema-card--purple">
+                  <span>Principal</span>
+                  <strong>vuelos</strong>
+                  <p>id_aerolinea, id_aeropuerto, id_movimiento, dia</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="grid gap-4 md:grid-cols-3">
+              <article class="stat-card">
+                <p>Vuelos</p>
+                <strong>{{ data.flightsSummary?.total_vuelos || 0 }}</strong>
+                <span>Registros en SQL</span>
+              </article>
+
+              <article class="stat-card">
+                <p>Aerolíneas</p>
+                <strong>{{ data.flightsSummary?.total_aerolineas || 0 }}</strong>
+                <span>Catálogo disponible</span>
+              </article>
+
+              <article class="stat-card stat-card--purple">
+                <p>Aeropuertos</p>
+                <strong>{{ data.flightsSummary?.total_aeropuertos || 0 }}</strong>
+                <span>Aeropuertos analizados</span>
+              </article>
+            </section>
+
+            <!-- FLIGHT QUESTION 1 -->
+            <article class="question-card question-card--purple">
+              <button class="question-card__header" (click)="toggleQuestion('flight-1')">
+                <div>
+                  <span>Pregunta SQL 1</span>
+                  <h3>¿Cuál es el aeropuerto que tuvo mayor movimiento durante el año?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'flight-1'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'flight-1'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/flights/top-airport</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Respuesta</p>
+                    <strong>
+                      <span *ngFor="let airport of data.topAirport; let last = last">
+                        {{ airport.nombre_aeropuerto }} con {{ airport.total_movimientos }} movimientos<span *ngIf="!last">, </span>
+                      </span>
+                    </strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: se agrupan los vuelos por aeropuerto para identificar cuál tuvo mayor actividad registrada.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- FLIGHT QUESTION 2 -->
+            <article class="question-card question-card--purple">
+              <button class="question-card__header" (click)="toggleQuestion('flight-2')">
+                <div>
+                  <span>Pregunta SQL 2</span>
+                  <h3>¿Cuál es la aerolínea que realizó mayor número de vuelos?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'flight-2'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'flight-2'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/flights/top-airline</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Respuesta</p>
+                    <strong>
+                      <span *ngFor="let airline of data.topAirline; let last = last">
+                        {{ airline.nombre_aerolinea }} con {{ airline.total_vuelos }} vuelos<span *ngIf="!last">, </span>
+                      </span>
+                    </strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: se agrupan los registros por aerolínea para detectar cuál tuvo mayor participación.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- FLIGHT QUESTION 3 -->
+            <article class="question-card question-card--purple">
+              <button class="question-card__header" (click)="toggleQuestion('flight-3')">
+                <div>
+                  <span>Pregunta SQL 3</span>
+                  <h3>¿En qué día se tuvo mayor número de vuelos?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'flight-3'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'flight-3'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/flights/busiest-day</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Respuesta</p>
+                    <strong>
+                      <span *ngFor="let day of data.busiestDay; let last = last">
+                        {{ day.dia }} con {{ day.total_vuelos }} vuelos<span *ngIf="!last">, </span>
+                      </span>
+                    </strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: se agrupan los vuelos por día para encontrar la fecha con mayor actividad.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <!-- FLIGHT QUESTION 4 -->
+            <article class="question-card question-card--purple">
+              <button class="question-card__header" (click)="toggleQuestion('flight-4')">
+                <div>
+                  <span>Pregunta SQL 4</span>
+                  <h3>¿Cuáles aerolíneas tienen más de 2 vuelos por día?</h3>
+                </div>
+
+                <strong [class.rotate-180]="expandedQuestion === 'flight-4'">↓</strong>
+              </button>
+
+              <section *ngIf="expandedQuestion === 'flight-4'" class="question-card__body">
+                <div class="answer-grid">
+                  <div class="answer-box">
+                    <p>Endpoint</p>
+                    <strong>/api/flights/airlines-more-than-two-flights-per-day</strong>
+                  </div>
+
+                  <div class="answer-box answer-box--wide">
+                    <p>Respuesta</p>
+
+                    <strong *ngIf="data.moreThanTwoPerDay?.results?.length === 0">
+                      No hay aerolíneas que cumplan esta condición con los datos proporcionados.
+                    </strong>
+
+                    <strong *ngIf="data.moreThanTwoPerDay?.results?.length > 0">
+                      {{ data.moreThanTwoPerDay?.results?.length }} resultado(s)
+                    </strong>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                      Interpretación: se valida si alguna aerolínea supera dos vuelos en un mismo día. Con los datos actuales,
+                      la condición no se cumple.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </article>
+
+            <section class="table-card">
+              <div class="table-header">
+                <div>
+                  <p class="section-label">Tabla general</p>
+                  <h3>Registros de vuelos</h3>
+
+                  <p class="mt-3 text-sm leading-7 text-slate-500">
+                    Esta tabla muestra los datos generales ya unidos mediante SQL JOIN para que se entiendan sin ver IDs.
+                  </p>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto rounded-3xl border border-pink-100">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Aerolínea</th>
+                      <th>Aeropuerto</th>
+                      <th>Movimiento</th>
+                      <th>Día</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr *ngFor="let flight of data.allFlights">
+                      <td>{{ flight.id_vuelo }}</td>
+                      <td>{{ flight.nombre_aerolinea }}</td>
+                      <td>{{ flight.nombre_aeropuerto }}</td>
+                      <td>
+                        <span class="rounded-full bg-pink-100 px-3 py-1 text-xs font-black text-pink-600">
+                          {{ flight.movimiento }}
+                        </span>
+                      </td>
+                      <td>{{ flight.dia }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+        </ng-container>
+      </div>
+    </section>
+  </div>
+</main>
