@@ -23,5 +23,8 @@ certs/
 # OS / IDE
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
+branch_structure.json

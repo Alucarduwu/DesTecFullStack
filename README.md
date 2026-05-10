@@ -1,4 +1,4 @@
-<h1 align="center">✨ Reto Técnico FullStack - Casa Mecate</h1>
+<h1 align="center">✨ DEV FullStack - </h1>
 
 <p align="center">
   <b>FullStack Technical Challenge</b><br/>
